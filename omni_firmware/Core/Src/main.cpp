@@ -41,11 +41,15 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
+TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim9;
 
 UART_HandleTypeDef huart2;
@@ -67,38 +71,48 @@ static void MX_TIM4_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM9_Init(void);
+static void MX_TIM6_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_TIM7_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float v_set[4] = {300,300,300,300}, v_enc[4] = {0,0,0,0}; //rpm
-float Kp[4] = {2,1,1,1}, Ki[4] = {0.1,0,0,0}, Kd[4] = {0,0,0,0}, Ta = 0.2; //Ta là chu ki ngat de tinh PID
+float tau = .98, dt = 0.004;
+uint16_t num_cal_point = 1500;
+float v_set[4] = {0,0,0,0}, v_enc[4] = {0,0,0,0}; //rpm
+float Kp[4] = {0,0,0,0}, Ki[4] = {0,0,0,0}, Kd[4] = {0,0,0,0}, Ta = 0.2; //Ta is the interrupt cycle for PID calculation
 float e[4] = {0,0,0,0}, sum_e[4] = {0,0,0,0}, pre_e[4] = {0,0,0,0}, d_e[4] = {0,0,0,0};
 int16_t duty[4] = {0,0,0,0};
 uint16_t encoder_cnt[4] = {0,0,0,0}, encoder_cnt_pre[4] = {0,0,0,0};
 int16_t delta[4] = {0,0,0,0};
-float r = 0.05, d = 0.2*sqrt(2), l = 2*pi*r;
-bool check_PID =0;
+float r = 0.05, d = 0.175*sqrt(2), l = 2*pi*r;
+float data_PID[12]= {0,0,0,0,0,0,0,0,0,0,0,0};
+bool check_PID = 0;
+float test_w = 1.213, test_r;
+uint8_t error =0;
 void PID()
 {
 	for (int i = 0; i < 4; i++){
-		e[i] = v_set[i] - v_enc[i];
-		sum_e[i] += (e[i] + pre_e[i])/2;
-		d_e[i] = e[i] - pre_e[i];
-		pre_e[i] = e[i];
+		if (v_set[i] == 0) duty[i] = 0;
+		else {
+			e[i] = v_set[i] - v_enc[i];
+			sum_e[i] += (e[i] + pre_e[i])/2;
+			d_e[i] = e[i] - pre_e[i];
+			pre_e[i] = e[i];
+			duty[i] += (Kp[i] * e[i] + Ki[i] * Ta * sum_e[i] + Kd[i] * (1 / Ta) * d_e[i]);
 
-		duty[i] += (Kp[i] * e[i] + Ki[i] * Ta * sum_e[i] + Kd[i] * (1 / Ta) * d_e[i]);
-
-		//gioi han gia tri duty
-		if (duty[i] > 999)
-		{
-			duty[i] = 999;
-		}
-		else if (duty[i] < -999 )
-		{
-			duty[i] = -999;
+			//Limit the Duty value
+			if (duty[i] > 999)
+			{
+				duty[i] = 999;
+			}
+			else if (duty[i] < -999 )
+			{
+				duty[i] = -999;
+			}
 		}
 	}
 
@@ -145,32 +159,37 @@ void PID()
 	check_PID = 0;
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)		// CT phuc vu ngat timer
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (htim->Instance == TIM9)
+	// Check if timer has triggered and update attitude
+	if (htim == &htim7)
 	{
-		encoder_cnt[0] = __HAL_TIM_GET_COUNTER(&htim2);
-		encoder_cnt[1] = __HAL_TIM_GET_COUNTER(&htim3);
-		encoder_cnt[2] = __HAL_TIM_GET_COUNTER(&htim4);
-		encoder_cnt[3] = __HAL_TIM_GET_COUNTER(&htim5);
-		for (int i = 0; i < 4; i++){
-			if(encoder_cnt[i] - encoder_cnt_pre[i] > 30000)			// Overflow khi quay nguoc
-			{
-				delta[i] = encoder_cnt[i] - encoder_cnt_pre[i] - 65536;
+		MPU_calcAttitude(&hi2c1);
+	}
+	if (htim->Instance == TIM6)
+	{
+			encoder_cnt[0] = __HAL_TIM_GET_COUNTER(&htim2);
+			encoder_cnt[1] = __HAL_TIM_GET_COUNTER(&htim3);
+			encoder_cnt[2] = __HAL_TIM_GET_COUNTER(&htim4);
+			encoder_cnt[3] = __HAL_TIM_GET_COUNTER(&htim5);
+			for (int i = 0; i < 4; i++){
+				if(-encoder_cnt[i] + encoder_cnt_pre[i] > 30000)			// Handle counter overflow when reversing
+				{
+					delta[i] = -encoder_cnt[i] + encoder_cnt_pre[i] - 65536;
+				}
+				else if(-encoder_cnt[i] + encoder_cnt_pre[i] < -30000)	// Handling counter overflow during forward rotation
+				{
+					delta[i] = -encoder_cnt[i] + encoder_cnt_pre[i] + 65536;
+				}
+				else
+				{
+					delta[i] = -encoder_cnt[i] + encoder_cnt_pre[i];
+				}
+				v_enc[i] = (float)(delta[i])*60*5/1440;
+				encoder_cnt_pre[i] = encoder_cnt[i] ;
 			}
-			else if(encoder_cnt[i] - encoder_cnt_pre[i] < -30000)	// Overflow khi quay thuan
-			{
-				delta[i] = encoder_cnt[i] - encoder_cnt_pre[i] + 65536;
-			}
-			else
-			{
-				delta[i] = encoder_cnt[i] - encoder_cnt_pre[i];
-			}
-			v_enc[i] = (float)(delta[i])*60*5/998;
-			encoder_cnt_pre[i] = encoder_cnt[i] ;
-		}
-		check_PID = 1;
-		//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+			check_PID = 1;
+			PID();
 	}
 }
 /* USER CODE END 0 */
@@ -211,7 +230,23 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM1_Init();
   MX_TIM9_Init();
+  MX_TIM6_Init();
+  MX_I2C1_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
+  Flash_Read_Array_Float(0x080A0000, Kp, 4);
+  Flash_Read_Array_Float(0x080C0000, Ki, 4);
+  Flash_Read_Array_Float(0x080E0000, Kd, 4);
+
+  setup();
+  if (MPU_begin(&hi2c1, AD0_LOW, tau, dt))
+   {
+	  error =0;
+   }
+  else error =1;
+
+  MPU_calibrateGyro(&hi2c1, num_cal_point);
+
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
@@ -222,9 +257,8 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim5,TIM_CHANNEL_ALL);
 
-  HAL_TIM_Base_Start_IT(&htim9);
-
-  setup();
+  HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start_IT(&htim7);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -234,8 +268,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if (check_PID)  PID();
-	  loop();
+	data_PID[0] = Kp[0]; data_PID[1] = Ki[0]; data_PID[2] = Kd[0]; data_PID[3] = Kp[1]; data_PID[4] = Ki[1]; data_PID[5] = Kd[1]; data_PID[6] = Kp[2]; data_PID[7] = Ki[2]; data_PID[8] = Kd[2]; data_PID[9] = Kp[3]; data_PID[10] = Ki[3]; data_PID[11] = Kd[3];
+
+	loop();
   }
   /* USER CODE END 3 */
 }
@@ -287,6 +322,40 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -333,7 +402,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 999;
+  sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -343,17 +412,14 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 799;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 599;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 399;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
@@ -573,6 +639,82 @@ static void MX_TIM5_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 1679;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 9999;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 3359;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 99;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
+
+}
+
+/**
   * @brief TIM9 Initialization Function
   * @param None
   * @retval None
@@ -688,9 +830,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_12
                           |GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14|GPIO_PIN_2, GPIO_PIN_RESET);
-
   /*Configure GPIO pin : PC5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -706,13 +845,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PD14 PD2 */
-  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_2;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
