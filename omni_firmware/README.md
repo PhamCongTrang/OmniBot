@@ -1,4 +1,4 @@
-# Motor_Controller_STM32F4
+# Omni_firmware
 Controlling Motor Speed with STM32F407 Kit
 ![Untitled](https://github.com/WanL0q/Motor_Controller_STM32F4/assets/134664967/8cce08ca-791c-4710-b91d-051e33a09514)
 ## Forward Kinematics
