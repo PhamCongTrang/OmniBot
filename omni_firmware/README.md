@@ -10,9 +10,9 @@ v_y \\
 \end{bmatrix}
 \=\
 \begin{bmatrix}
+-1/2\sqrt{2} & 1/2\sqrt{2} & 1/2\sqrt{2} & -1/2\sqrt{2} \\
 1/2\sqrt{2} & 1/2\sqrt{2} & -1/2\sqrt{2} & -1/2\sqrt{2} \\
-1/2\sqrt{2} & -1/2\sqrt{2} & -1/2\sqrt{2} & 1/2\sqrt{2} \\
--1/4d & -1/4d & -1/4d & -1/4d \\
+1/4d & 1/4d & 1/4d & 1/4d \\
 \end{bmatrix}
 \begin{bmatrix}
 v_1 \\
