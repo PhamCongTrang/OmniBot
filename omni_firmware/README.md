@@ -74,3 +74,5 @@ $$
 - Topic "cmd_vel": Longitudinal velocity and angular velocity set for the robot.
 - Topic "vel_set": Velocity is set for 4 motors.
 - Topic "vel_enc": Velocity of the 4 motors calculated from encoders.
+- Topic "cmd_PID": Adjusting the P, I, D coefficients for the 4 wheels.
+- Topic "imu/raw": Data read from IMU.
