@@ -1,6 +1,7 @@
 # Omni_firmware
 Controlling Motor Speed with STM32F407 Kit
-![Untitled](https://github.com/WanL0q/Motor_Controller_STM32F4/assets/134664967/8cce08ca-791c-4710-b91d-051e33a09514)
+![Untitled](https://github.com/PhamCongTrang/OmniBot/assets/134664967/cdabbf5b-4bca-481a-9460-a434ca6584c6)
+
 ## Forward Kinematics
 $$
 \begin{bmatrix}
@@ -10,9 +11,9 @@ v_y \\
 \end{bmatrix}
 \=\
 \begin{bmatrix}
+-1/2\sqrt{2} & 1/2\sqrt{2} & 1/2\sqrt{2} & -1/2\sqrt{2} \\
 1/2\sqrt{2} & 1/2\sqrt{2} & -1/2\sqrt{2} & -1/2\sqrt{2} \\
-1/2\sqrt{2} & -1/2\sqrt{2} & -1/2\sqrt{2} & 1/2\sqrt{2} \\
--1/4d & -1/4d & -1/4d & -1/4d \\
+1/4d & 1/4d & 1/4d & 1/4d \\
 \end{bmatrix}
 \begin{bmatrix}
 v_1 \\
@@ -31,10 +32,10 @@ v_4 \\
 \end{bmatrix}
 \=\
 \begin{bmatrix}
-1/\sqrt{2} & 1/\sqrt{2} & -d \\
-1/\sqrt{2} & -1/\sqrt{2} & -d \\
--1/\sqrt{2} & -1/\sqrt{2} & -d \\
--1/\sqrt{2} & 1/\sqrt{2} & -d \\
+-1/\sqrt{2} & 1/\sqrt{2} & d \\
+1/\sqrt{2} & 1/\sqrt{2} & d \\
+1/\sqrt{2} & -1/\sqrt{2} & d \\
+-1/\sqrt{2} & -1/\sqrt{2} & d \\
 \end{bmatrix}
 \begin{bmatrix}
 v_x \\
@@ -73,3 +74,5 @@ $$
 - Topic "cmd_vel": Longitudinal velocity and angular velocity set for the robot.
 - Topic "vel_set": Velocity is set for 4 motors.
 - Topic "vel_enc": Velocity of the 4 motors calculated from encoders.
+- Topic "cmd_PID": Adjusting the P, I, D coefficients for the 4 wheels.
+- Topic "imu/raw": Data read from IMU.
