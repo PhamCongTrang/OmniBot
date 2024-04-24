@@ -21,18 +21,23 @@
     </link>
     
     <!--CAM D435-->
-    <xacro:sensor_d435 name="realsense_d435" parent="base_link">
+    <joint name="lidar_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera_link"/>
         <origin xyz="${d435_x} 0 ${d435_z}" rpy="0 0 0"/>
-    </xacro:sensor_d435>
+    </joint>
+
+    <link name="camera_link">
+    </link>
 
     <!--LIDAR-->
     <joint name="lidar_joint" type="fixed">
         <parent link="base_link"/>
-        <child link="lidar_link"/>
+        <child link="laser"/>
         <origin xyz="0 0 ${lidar_z}" rpy="0 0 0"/>
     </joint>
 
-    <link name="lidar_link">
+    <link name="laser">
     </link>
 
 </robot>
