@@ -481,31 +481,26 @@ void MPU_writeAccScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
     switch (aScale)
     {
     case AFSR_2G:
-    	AFSR = 2;
         scaleFactor.a = 16384.0;
         select = 0x00;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFSR_4G:
-    	AFSR = 4;
         scaleFactor.a = 8192.0;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFSR_8G:
-    	AFSR = 8;
         scaleFactor.a = 4096.0;
         select = 0x10;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFSR_16G:
-    	AFSR = 16;
         scaleFactor.a = 2048.0;
         select = 0x18;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
-    	AFSR = 4;
         scaleFactor.a = 8192.0;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
@@ -526,31 +521,26 @@ void MPU_writeGyrScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
     switch (gScale)
     {
     case GFSR_250DPS:
-    	GFSR = 250;
         scaleFactor.g = 131.0;
         select = 0x00;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFSR_500DPS:
-    	GFSR = 500;
         scaleFactor.g = 65.5;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFSR_1000DPS:
-    	GFSR = 1000;
         scaleFactor.g = 32.8;
         select = 0x10;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFSR_2000DPS:
-    	GFSR = 2000;
         scaleFactor.g = 16.4;
         select = 0x18;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
-    	GFSR = 500;
         scaleFactor.g = 65.5;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
