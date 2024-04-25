@@ -100,10 +100,10 @@ void loop(void) {
 	  imu_msg.angular_velocity.z = sensorData.gz ;
 
 	  //Orientation
-	  imu_msg.orientation.x = 0 ;
-	  imu_msg.orientation.y = 0 ;
-	  imu_msg.orientation.z = 0 ;
-	  imu_msg.orientation.w = 0 ;
+	  imu_msg.orientation.x = quaternion.x ;
+	  imu_msg.orientation.y = quaternion.y ;
+	  imu_msg.orientation.z = quaternion.z ;
+	  imu_msg.orientation.w = quaternion.w ;
 
 	  imu.publish(&imu_msg);
 	  HAL_Delay(40);
@@ -380,15 +380,20 @@ void Flash_Read_Array_Float(uint32_t StartSectorAddress, float *Array, uint16_t 
 
 /* IMU */
 
-uint8_t _addr, _maddr ,_name;
-int AFSR = 4, GFSR = 500;
-float _tau, _dt, RAD2DEG = 57.2977951308;
+uint8_t _addr, 					// Hex address based on AD0 pin
+		_maddr, 				// Magnetometer register address (currently unused)
+		_name;					// IMU name (MPU6050/9250)
+int ADSR = AFSR_4G, 			// Accelerometer default scale range (4g)
+	GDSR = GFSR_500DPS;			// Gyroscope default scale rang (500dps)
+float _tau, 					// Complementary coefficient
+	_dt; 						// Sample rate
 
-RawData rawData;
-SensorData sensorData;
-GyroCal gyroCal;
-Attitude attitude;
-ScaleFactor scaleFactor;
+RawData rawData;			// Raw data read from registers
+SensorData sensorData;		// Data after processing through full scale range and calibrated: linear acceleration (ax, ay, az), angular velocity (gx, gy, gz)
+GyroCal gyroCal;			// Offsets of gyroscope
+Attitude attitude;			// Roll, pitch, yaw angle in degree
+ScaleFactor scaleFactor;	// Scale factor of the imu, accelerometer: a (unit: g), gyroscope: g (unit: dps)
+Quaternion quaternion;		// Quaternion from Euler angles: q = w + x * i + y * j + z * k
 
 /// @brief Limit attitude value within (-180;180) degree.
 /// @param angle Attitude value.
@@ -440,7 +445,7 @@ uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, float tau, float dt)
         // Startup / reset the sensor
         select = 0x00;
         HAL_I2C_Mem_Write(I2Cx, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
-        MPU_setFullScaleRange(I2Cx, AFSR_4G, GFSR_500DPS);
+        MPU_setFullScaleRange(I2Cx, ADSR, GDSR);
 
         return 1;
     }
@@ -616,13 +621,6 @@ void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
     gyroCal.z = (float)z / (float)numCalPoints;
 }
 
-/// @brief Calibrate the magnetometer
-/// @param I2Cx Pointer to I2C structure config.
-void MPU_calibrateMag(I2C_HandleTypeDef *I2Cx)
-{
-
-}
-
 /// @brief Calculate the real world sensor values.
 /// @param I2Cx Pointer to I2C structure config.
 void MPU_readSensorData(I2C_HandleTypeDef *I2Cx)
@@ -662,7 +660,34 @@ void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
     attitude.y += sensorData.gz * _dt;
 
     // Limit attitude value from -180 degree to 180 degree
-    attitude.r = limAngle(attitude.r);
-    attitude.p = limAngle(attitude.p);
-    attitude.y = limAngle(attitude.y);
+    // attitude.r = limAngle(attitude.r);
+    // attitude.p = limAngle(attitude.p);
+    // attitude.y = limAngle(attitude.y);
+
+    // Convert to quaternion
+    toQuaternion(attitude);
+}
+
+/// @brief Convert Euler angles to quaternion.
+/// @param att Attitudes in degree include roll, pitch and yaw.
+void toQuaternion(Attitude att)
+{
+	// Degree to radian
+	att.r *= DEG2RAD;
+	att.p *= DEG2RAD;
+	att.y *= DEG2RAD;
+
+    // Abbreviations for the various angular functions
+	double cr = cos(att.r * 0.5);
+	double sr = sin(att.r * 0.5);
+	double cp = cos(att.p * 0.5);
+	double sp = sin(att.p * 0.5);
+	double cy = cos(att.y * 0.5);
+	double sy = sin(att.y * 0.5);
+
+	// Results
+	quaternion.w = cr * cp * cy + sr * sp * sy;
+	quaternion.x = sr * cp * cy - cr * sp * sy;
+	quaternion.y = cr * sp * cy + sr * cp * sy;
+	quaternion.z = cr * cp * sy - sr * sp * cy;
 }

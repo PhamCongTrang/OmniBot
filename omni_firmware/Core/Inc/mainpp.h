@@ -16,27 +16,29 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_i2c.h"
 
- // Defines
- #define WHO_AM_I_6050_ANS 0x68
- #define WHO_AM_I_9250_ANS 0x71
- #define WHO_AM_I          0x75
- #define AD0_LOW           0x68
- #define AD0_HIGH          0x69
- #define MAG_LOW			  0x0C
- #define MAG_HIGH		  0x0D
- #define GYRO_CONFIG       0x1B
- #define ACCEL_CONFIG      0x1C
- #define PWR_MGMT_1        0x6B
- #define ACCEL_XOUT_H      0x3B
- #define ACCEL_YOUT_H	  0x3D
- #define ACCEL_ZOUT_H	  0x3F
- #define GYRO_XOUT_H		  0x43
- #define GYRO_YOUT_H		  0x45
- #define GYRO_ZOUT_H		  0x47
- #define MAG_XOUT_H		  0x03
- #define MAG_YOUT_H		  0x05
- #define MAG_ZOUT_H		  0x07
- #define I2C_TIMOUT_MS     1000
+// Defines IMU
+#define WHO_AM_I_6050_ANS	0x68
+#define WHO_AM_I_9250_ANS	0x71
+#define WHO_AM_I			0x75
+#define AD0_LOW				0x68
+#define AD0_HIGH			0x69
+#define MAG_LOW				0x0C
+#define MAG_HIGH			0x0D
+#define GYRO_CONFIG			0x1B
+#define ACCEL_CONFIG		0x1C
+#define PWR_MGMT_1			0x6B
+#define ACCEL_XOUT_H		0x3B
+#define ACCEL_YOUT_H		0x3D
+#define ACCEL_ZOUT_H		0x3F
+#define GYRO_XOUT_H			0x43
+#define GYRO_YOUT_H			0x45
+#define GYRO_ZOUT_H			0x47
+#define MAG_XOUT_H			0x03
+#define MAG_YOUT_H			0x05
+#define MAG_ZOUT_H			0x07
+#define I2C_TIMOUT_MS		1000
+#define RAD2DEG		57.2977951308
+#define DEG2RAD		0.01745329251
 
 // IMU names
 enum imuName
@@ -87,15 +89,21 @@ typedef struct {
 	float a, g;
 } ScaleFactor;
 
+// Quaternion
+typedef struct {
+	double w, x, y, z;
+} Quaternion;
+
 extern uint8_t _addr, _maddr, _name;
 extern int AFSR, GFSR;
-extern float _tau, _dt, RAD2DEG;
+extern float _tau, _dt;
 
 extern RawData rawData;
 extern SensorData sensorData;
 extern GyroCal gyroCal;
 extern Attitude attitude;
 extern ScaleFactor scaleFactor;
+extern Quaternion quaternion;
 
 // Functions IMU
 float limAngle(float angle);
@@ -107,6 +115,7 @@ void MPU_readRawData(I2C_HandleTypeDef *I2Cx);
 void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints);
 void MPU_readSensorData(I2C_HandleTypeDef *I2Cx);
 void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx);
+void toQuaternion(Attitude att);
 
 // Functions Rosserial
 void setup();
