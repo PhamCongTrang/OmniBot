@@ -1,6 +1,3 @@
 [submodule "ThirdParty/ThirdParty/rosserial_stm32"]
 	path = ThirdParty/ThirdParty/rosserial_stm32
 	url = https://github.com/yoneken/rosserial_stm32.git
-[submodule "ThirdParty/rosserial_stm32"]
-	path = ThirdParty/rosserial_stm32
-	url = https://github.com/yoneken/rosserial_stm32.git
