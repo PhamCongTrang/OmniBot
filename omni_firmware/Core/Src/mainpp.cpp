@@ -85,7 +85,7 @@ void loop(void) {
 	PID.publish(&PID_msg);
 	HAL_Delay(40);*/
 	  //Header
-	MPU_readSensorData(&hi2c1);
+	//MPU_readSensorData(&hi2c1);
 	  imu_msg.header.stamp = nh.now();
 	  imu_msg.header.frame_id  ="imu";
 
@@ -106,7 +106,7 @@ void loop(void) {
 	  imu_msg.orientation.w = quaternion.w ;
 
 	  imu.publish(&imu_msg);
-	  HAL_Delay(40);
+	  HAL_Delay(10);
 	nh.spinOnce();
 }
 
