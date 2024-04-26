@@ -1,0 +1,17 @@
+<launch>
+    <!--TF-->
+    <include file="$(find omni_description)/launch/urdf_visual.launch"/>
+    
+    <!--bringup camera-->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
+    
+    <!--bringup lidar-->
+    <include file="$(find urg_node)/launch/urg_lidar.launch"/>
+
+    <!-- bringup rosserial -->
+    <include file="$(find omni_bringup)/launch/rosserial.launch"/>
+
+    <!-- bringup publish odom -->
+    <include file="$(find omni_robot)/launch/omni_odom.launch"/>
+    
+</launch>
