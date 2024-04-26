@@ -46,7 +46,7 @@ extern float v_enc[4];
 extern float v_set[4];
 extern float Kp[4], Ki[4], Kd[4], data_PID[12];
 extern float d, l;
-long sequence = 0;
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 	nh.getHardware()->flush();
 }
