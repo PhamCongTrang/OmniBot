@@ -268,7 +268,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	data_PID[0] = Kp[0]; data_PID[1] = Ki[0]; data_PID[2] = Kd[0]; data_PID[3] = Kp[1]; data_PID[4] = Ki[1]; data_PID[5] = Kd[1]; data_PID[6] = Kp[2]; data_PID[7] = Ki[2]; data_PID[8] = Kd[2]; data_PID[9] = Kp[3]; data_PID[10] = Ki[3]; data_PID[11] = Kd[3];
+	//data_PID[0] = Kp[0]; data_PID[1] = Ki[0]; data_PID[2] = Kd[0]; data_PID[3] = Kp[1]; data_PID[4] = Ki[1]; data_PID[5] = Kd[1]; data_PID[6] = Kp[2]; data_PID[7] = Ki[2]; data_PID[8] = Kd[2]; data_PID[9] = Kp[3]; data_PID[10] = Ki[3]; data_PID[11] = Kd[3];
 
 	loop();
   }
@@ -696,7 +696,7 @@ static void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 3359;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 99;
+  htim7.Init.Period = 499;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
   {
