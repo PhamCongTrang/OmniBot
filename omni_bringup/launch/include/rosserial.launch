@@ -3,4 +3,5 @@
     <param name="port" value="/dev/ttyUSB0"/>
     <!-- <param name="baud" value="115200"/> -->
   </node>
+  <include file="$(find omni_bringup)/launch/include/imu_filter.launch"/>
 </launch>
