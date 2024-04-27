@@ -21,7 +21,7 @@
     </link>
     
     <!--CAM D435-->
-    <joint name="lidar_joint" type="fixed">
+    <joint name="camera_joint" type="fixed">
         <parent link="base_link"/>
         <child link="camera_link"/>
         <origin xyz="${d435_x} 0 ${d435_z}" rpy="0 0 0"/>

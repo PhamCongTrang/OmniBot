@@ -23,37 +23,57 @@ class OdomPublisher:
             rospy.logwarn("Invalid data length received from 'vel_enc' topic.")
             return
 
+<<<<<<< HEAD
         # Get vel_enc_data from message Float32MultiArray
         vel_enc_data = data.data
 
         # [v_x, v_y, v_theta]
+=======
+        vel_enc_data = data.data
+
+>>>>>>> 5020ffc1870bfa554073ad315dea1f0d44ac5f17
         v_x = (1/math.sqrt(8)) * (-vel_enc_data[0] + vel_enc_data[1] + vel_enc_data[2] - vel_enc_data[3]) * (l/ 60)
         v_y = (1/math.sqrt(8)) * ( vel_enc_data[0] + vel_enc_data[1] - vel_enc_data[2] - vel_enc_data[3]) * (l/ 60)
         v_theta = (1/(4*d)) * (vel_enc_data[0] + vel_enc_data[1] + vel_enc_data[2] + vel_enc_data[3]) * (l/ 60)
 
+<<<<<<< HEAD
         # Set message Odometry
         odom_msg = Odometry()
 
         # Set header
+=======
+        odom_msg = Odometry()
+
+>>>>>>> 5020ffc1870bfa554073ad315dea1f0d44ac5f17
         odom_msg.header.stamp = rospy.Time.now()
         odom_msg.header.frame_id = 'odom'
         odom_msg.child_frame_id = 'base_link'
 
+<<<<<<< HEAD
         # Set pose
+=======
+>>>>>>> 5020ffc1870bfa554073ad315dea1f0d44ac5f17
         pose_covariance = [0] * 36  # 6x6 matrix
         pose_covariance[0] = 0.1  # x variance
         pose_covariance[7] = 0.1  # y variance
         pose_covariance[35] = 0.2  # yaw variance
         pose_with_covariance = PoseWithCovariance(
             pose=Pose(
+<<<<<<< HEAD
                 position=Vector3(0, 0, 0),
+=======
+                position=Vector3(0, 0, 0),  
+>>>>>>> 5020ffc1870bfa554073ad315dea1f0d44ac5f17
                 orientation=Quaternion(*quaternion_from_euler(0, 0, v_theta))
             ),
             covariance=pose_covariance
         )
         odom_msg.pose = pose_with_covariance
 
+<<<<<<< HEAD
         # Set twist
+=======
+>>>>>>> 5020ffc1870bfa554073ad315dea1f0d44ac5f17
         twist_covariance = [0] * 36  # 6x6 matrix
         twist_covariance[0] = 0.1  # linear x variance
         twist_covariance[7] = 0.1  # linear y variance
@@ -69,7 +89,7 @@ class OdomPublisher:
 
         # Publish message Odometry
         self.odom_pub.publish(odom_msg)
-        self.rate.sleep()
+        # self.rate.sleep()
 
 def main():
     odom_pub = OdomPublisher()
