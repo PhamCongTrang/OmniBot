@@ -9,6 +9,7 @@
     <xacro:property name="d435_z" value="0.21"/>
     <xacro:property name="d435_x" value="0.115"/>
     <xacro:property name="lidar_z" value="0.34"/>
+    <xacro:property name="imu_z" value="0.13"/>
 
     <link name="base_footprint"/>
     <joint name="base_joint" type="fixed">
@@ -38,6 +39,16 @@
     </joint>
 
     <link name="laser">
+    </link>
+
+    <!--IMU-->
+    <joint name="imu_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu"/>
+        <origin xyz="0 0 ${imu_z}" rpy="0 0 0"/>
+    </joint>
+
+    <link name="imu">
     </link>
 
 </robot>
