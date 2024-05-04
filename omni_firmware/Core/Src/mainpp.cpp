@@ -632,6 +632,14 @@ void MPU_readSensorData(I2C_HandleTypeDef *I2Cx)
     sensorData.gx /= scaleFactor.g;
     sensorData.gy /= scaleFactor.g;
     sensorData.gz /= scaleFactor.g;
+
+    // Convert accel and gyro values to m/s^2 and radian
+    sensorData.ax *= G2MPS2;
+    sensorData.ay *= G2MPS2;
+    sensorData.az *= G2MPS2;
+    sensorData.gx *= DEG2RAD;
+    sensorData.gy *= DEG2RAD;
+    sensorData.gz *= DEG2RAD;
 }
 
 /// @brief Calculate the attitude of the sensor in degrees using a complementary filter.
@@ -642,35 +650,22 @@ void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
     MPU_readSensorData(I2Cx);
 
     // Complementary filter
-    float accelPitch = atan2(sensorData.ay, sensorData.az) * RAD2DEG;
-    float accelRoll = atan2(sensorData.ax, sensorData.az) * RAD2DEG;
+    float accelPitch = atan2(sensorData.ay, sensorData.az);
+    float accelRoll = atan2(sensorData.ax, sensorData.az);
 
     attitude.r = _tau * (attitude.r - sensorData.gy * _dt) + (1 - _tau) * accelRoll;
     attitude.p = _tau * (attitude.p + sensorData.gx * _dt) + (1 - _tau) * accelPitch;
     attitude.y += sensorData.gz * _dt;
-
-    // Convert accel and gyro values to suitable imu_msg
-    sensorData.ax *= G2MPS2;
-    sensorData.ay *= G2MPS2;
-    sensorData.az *= G2MPS2;
-    sensorData.gx *= DEG2RAD;
-    sensorData.gy *= DEG2RAD;
-    sensorData.gz *= DEG2RAD;
 
     // Convert to quaternion
     toQuaternion(attitude);
 }
 
 /// @brief Convert Euler angles to quaternion.
-/// @param att Attitudes in degree include roll, pitch and yaw.
+/// @param att Attitudes in radian include roll, pitch and yaw.
 void toQuaternion(Attitude att)
 {
-	// Degree to radian
-	att.r *= DEG2RAD;
-	att.p *= DEG2RAD;
-	att.y *= DEG2RAD;
-
-    // Abbreviations for the various angular functions
+	// Abbreviations for the various angular functions
 	double cr = cos(att.r * 0.5);
 	double sr = sin(att.r * 0.5);
 	double cp = cos(att.p * 0.5);
