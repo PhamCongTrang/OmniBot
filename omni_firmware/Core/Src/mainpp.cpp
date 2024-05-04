@@ -90,14 +90,14 @@ void loop(void) {
 	  imu_msg.header.frame_id  ="imu";
 
 	  //Linear Acceleration
-	  imu_msg.linear_acceleration.x = sensorData.ax ;
-	  imu_msg.linear_acceleration.y = sensorData.ay ;
-	  imu_msg.linear_acceleration.z = sensorData.az ;
+	  imu_msg.linear_acceleration.x = sensorData.ax * G2MPS2 ;
+	  imu_msg.linear_acceleration.y = sensorData.ay * G2MPS2 ;
+	  imu_msg.linear_acceleration.z = sensorData.az * G2MPS2 ;
 
 	  //Angular Velocity
-	  imu_msg.angular_velocity.x = sensorData.gx ;
-	  imu_msg.angular_velocity.y = sensorData.gy ;
-	  imu_msg.angular_velocity.z = sensorData.gz ;
+	  imu_msg.angular_velocity.x = sensorData.gx * DEG2RAD ;
+	  imu_msg.angular_velocity.y = sensorData.gy * DEG2RAD ;
+	  imu_msg.angular_velocity.z = sensorData.gz * DEG2EAD ;
 
 	  //Orientation
 	  imu_msg.orientation.x = quaternion.x ;

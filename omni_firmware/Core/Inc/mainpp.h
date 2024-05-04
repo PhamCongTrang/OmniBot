@@ -39,6 +39,7 @@
 #define I2C_TIMOUT_MS		1000
 #define RAD2DEG		57.2977951308
 #define DEG2RAD		0.01745329251
+#define G2MPS2      9.80665
 
 // IMU names
 enum imuName
