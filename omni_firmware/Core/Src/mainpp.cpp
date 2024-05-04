@@ -90,14 +90,14 @@ void loop(void) {
 	  imu_msg.header.frame_id  ="imu";
 
 	  //Linear Acceleration
-	  imu_msg.linear_acceleration.x = sensorData.ax * G2MPS2 ;
-	  imu_msg.linear_acceleration.y = sensorData.ay * G2MPS2 ;
-	  imu_msg.linear_acceleration.z = sensorData.az * G2MPS2 ;
+	  imu_msg.linear_acceleration.x = sensorData.ax ;
+	  imu_msg.linear_acceleration.y = sensorData.ay ;
+	  imu_msg.linear_acceleration.z = sensorData.az ;
 
 	  //Angular Velocity
-	  imu_msg.angular_velocity.x = sensorData.gx * DEG2RAD ;
-	  imu_msg.angular_velocity.y = sensorData.gy * DEG2RAD ;
-	  imu_msg.angular_velocity.z = sensorData.gz * DEG2EAD ;
+	  imu_msg.angular_velocity.x = sensorData.gx ;
+	  imu_msg.angular_velocity.y = sensorData.gy ;
+	  imu_msg.angular_velocity.z = sensorData.gz ;
 
 	  //Orientation
 	  imu_msg.orientation.x = quaternion.x ;
@@ -649,10 +649,13 @@ void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
     attitude.p = _tau * (attitude.p + sensorData.gx * _dt) + (1 - _tau) * accelPitch;
     attitude.y += sensorData.gz * _dt;
 
-    // Limit attitude value from -180 degree to 180 degree
-    // attitude.r = limAngle(attitude.r);
-    // attitude.p = limAngle(attitude.p);
-    // attitude.y = limAngle(attitude.y);
+    // Convert accel and gyro values to suitable imu_msg
+    sensorData.ax *= G2MPS2;
+    sensorData.ay *= G2MPS2;
+    sensorData.az *= G2MPS2;
+    sensorData.gx *= DEG2RAD;
+    sensorData.gy *= DEG2RAD;
+    sensorData.gz *= DEG2RAD;
 
     // Convert to quaternion
     toQuaternion(attitude);
