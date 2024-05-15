@@ -1,12 +1,13 @@
 <launch>
   <!-- Arguments -->
-  <arg name="map_file" default="$(find omni_navigation)/maps/map1.yaml"/>
+  <arg name="map_file" default="$(find omni_navigation)/maps/map_carto1.yaml"/>
   <arg name="open_rviz" default="true"/>
   <arg name="move_forward_only" default="false"/>
+  <arg name="multi_robot_name" default=""/>
 
   <!-- omni -->
-  <include file="$(find omni_bringup)/launch/omni_bringup.launch">
-  </include>
+  <!-- <include file="$(find omni_bringup)/launch/omni_bringup.launch">
+  </include> -->
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
@@ -20,8 +21,17 @@
   </include>
 
   <!-- rviz -->
-  <group if="$(arg open_rviz)"> 
+  <!-- <group if="$(arg open_rviz)"> 
     <node pkg="rviz" type="rviz" name="rviz" required="true"
           args="-d $(find omni_navigation)/rviz/omni_navigation.rviz"/>
-  </group>
+  </group> -->
+  <!-- <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+    <param name="tf_prefix" value="$(arg multi_robot_name)"/>
+  </node> -->
+<!-- <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="2 0 0 0 0 0 /map /base_footprint 100"/> -->
+ <!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
+    args="0.0 0.0 0.0 0 0 0.0 /map /odom 40" />
+  <node pkg="tf" type="static_transform_publisher" name="odom_to_basefootprint" 
+        args="0.0 0.0 0.0 0 0 0.0 /odom /base_footprint 40" /> -->
 </launch>

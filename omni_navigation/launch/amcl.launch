@@ -1,6 +1,6 @@
 <launch>
   <!-- Arguments -->
-  <arg name="scan_topic"     default="scan"/>
+  <arg name="scan"     default="scan"/>
   <arg name="initial_pose_x" default="0.0"/>
   <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_a" default="0.0"/>
@@ -22,7 +22,7 @@
     <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
     <param name="gui_publish_rate"          value="50.0"/>
 
-    <remap from="scan"                      to="$(arg scan_topic)"/>
+    <remap from="scan"                      to="$(arg scan)"/>
     <param name="laser_max_range"           value="3.5"/>
     <param name="laser_max_beams"           value="180"/>
     <param name="laser_z_hit"               value="0.5"/>
@@ -34,13 +34,15 @@
     <param name="laser_likelihood_max_dist" value="2.0"/>
     <param name="laser_model_type"          value="likelihood_field"/>
 
-    <param name="odom_model_type"           value="diff"/>
-    <param name="odom_alpha1"               value="0.1"/>
-    <param name="odom_alpha2"               value="0.1"/>
-    <param name="odom_alpha3"               value="0.1"/>
-    <param name="odom_alpha4"               value="0.1"/>
+    <param name="odom_model_type"           value="omni-corrected"/>
+    <param name="odom_alpha1"               value="0.005"/>
+    <param name="odom_alpha2"               value="0.005"/>
+    <param name="odom_alpha3"               value="0.01"/>
+    <param name="odom_alpha4"               value="0.005"/>
+    <param name="odom_alpha5"               value="0.003"/>
     <param name="odom_frame_id"             value="odom"/>
     <param name="base_frame_id"             value="base_footprint"/>
+    <param name="global_frame_id"           value="map"/>
 
   </node>
 </launch>
