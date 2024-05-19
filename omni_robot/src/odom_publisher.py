@@ -58,14 +58,14 @@ class OdomPublisher:
         # Set header
         odom_msg.header.stamp = rospy.Time.now()
         odom_msg.header.frame_id = 'odom'
-        odom_msg.child_frame_id = 'base_link'
+        odom_msg.child_frame_id = 'base_footprint'
 
         # Set pose
 
         pose_covariance = [0] * 36  # 6x6 matrix 
-        pose_covariance[0] = 0.1  # x variance
-        pose_covariance[7] = 0.1  # y variance
-        pose_covariance[35] = 0.2  # yaw variance
+        pose_covariance[0] = 0.0  # x variance
+        pose_covariance[7] = 0.0  # y variance
+        pose_covariance[35] = 0.0  # yaw variance
         pose_with_covariance = PoseWithCovariance(
             pose=Pose(
                 position=Vector3(x, y, 0.0),
@@ -77,9 +77,9 @@ class OdomPublisher:
 
         # Set twist
         twist_covariance = [0] * 36  # 6x6 matrix
-        twist_covariance[0] = 0.1  # linear x variance
-        twist_covariance[7] = 0.1  # linear y variance
-        twist_covariance[35] = 0.2  # angular z variance
+        twist_covariance[0] = 0.0  # linear x variance
+        twist_covariance[7] = 0.0  # linear y variance
+        twist_covariance[35] = 0.0  # angular z variance
         twist_with_covariance = TwistWithCovariance(
             twist=Twist(
                 linear=Vector3(v_x, v_y, 0.0),  # Assume no y and z motion
@@ -91,7 +91,6 @@ class OdomPublisher:
 
         # Publish message Odometry
         self.odom_pub.publish(odom_msg)
-        # self.rate.sleep()
 
 def main():
     odom_pub = OdomPublisher()
