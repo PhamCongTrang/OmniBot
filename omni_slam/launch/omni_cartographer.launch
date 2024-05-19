@@ -1,29 +1,18 @@
 <launch>
   <!-- Arguments -->
-  <arg name="configuration_basename" default="omni.lua"/>
-
-  <!-- move_base -->
-  <!-- <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
-    <arg name="model" value="$(arg model)" />
-  </include> -->
+  <arg name="configuration_basename" default="wheel.lua"/>
 
   <!-- cartographer_node -->
   <node pkg="cartographer_ros" type="cartographer_node" name="cartographer_node" 
         args="-configuration_directory $(find omni_slam)/config
               -configuration_basename $(arg configuration_basename)"
         output="screen">
-    <remap from="/imu" to="/imu/data"/>
-    <!--remap from="points2" to="/camera/depth/points" / -->
+    <remap from="/imu" to="/imu/raw"/>
+    <!-- <remap from="/odom" to="/raw_odom"/> -->
   </node>
 
   <!-- cartographer_occupancy_grid_node -->
   <node pkg="cartographer_ros" type="cartographer_occupancy_grid_node"
         name="cartographer_occupancy_grid_node" 
-        args="-resolution 0.05" />
-
-  <!-- flat_world_imu_node -->
-  <!-- <node pkg="turtlebot3_slam" type="flat_world_imu_node" name="flat_world_imu_node" output="screen">
-    <remap from="imu_in" to="/imu" />
-    <remap from="imu_out" to="/flat_imu" />
-  </node> -->
+        args="-resolution 0.03" />
 </launch>
