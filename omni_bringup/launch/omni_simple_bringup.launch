@@ -1,0 +1,19 @@
+<launch>
+    <!--TF-->
+    <include file="$(find omni_description)/launch/urdf_visual.launch"/>
+        
+    <!--bringup lidar-->
+    <include file="$(find omni_bringup)/launch/include/hokuyo.launch"/>
+
+    <!-- bringup rosserial -->
+    <include file="$(find omni_bringup)/launch/include/rosserial.launch"/>
+
+    <!-- bringup publish raw_odom -->
+    <include file="$(find omni_robot)/launch/omni_odom.launch"/>
+
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"> 
+        <remap from="odometry/filtered" to="odom"/>
+        <rosparam command="load" file="$(find omni_bringup)/param/ekf/robot_localization_test.yaml" />
+    </node>
+
+</launch>
