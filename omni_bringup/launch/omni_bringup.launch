@@ -11,6 +11,9 @@
     <!-- bringup rosserial -->
     <include file="$(find omni_bringup)/launch/include/rosserial.launch"/>
 
+    <!-- bringup rosserial -->
+    <include file="$(find omni_bringup)/launch/include/joy.launch"/>
+
     <!-- bringup publish raw_odom -->
     <include file="$(find omni_robot)/launch/omni_odom.launch"/>
     
