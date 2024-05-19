@@ -3,6 +3,8 @@
 #--------------------------------------------------------------------------------------------
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
+System.LoadAtlasFromFile: "ORB3_map6"
+
 File.version: "1.0"
 
 Camera.type: "PinHole"
@@ -25,7 +27,7 @@ Camera.width: 640
 Camera.height: 480
 
 # Camera frames per second 
-Camera.fps: 30
+Camera.fps: 15
 
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
 Camera.RGB: 1
