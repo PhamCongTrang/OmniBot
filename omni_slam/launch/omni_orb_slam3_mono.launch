@@ -2,14 +2,14 @@
     <param name="use_sim_time" value="false" />
 
     <!-- Main node -->
-    <node name="orb_slam3" pkg="orb_slam3_ros" type="ros_rgbd" output="screen">
+    <node name="orb_slam3" pkg="orb_slam3_ros" type="ros_mono" output="screen">
         <!-- change the topics according to the dataset -->
         <remap from="/camera/rgb/image_raw"    to="/camera/color/image_raw"/>
         <remap from="/camera/depth_registered/image_raw"   to="/camera/depth/image_rect_raw"/>
 
         <!-- Parameters for original ORB-SLAM3 -->
         <param name="voc_file"      type="string" value="$(find orb_slam3_ros)/orb_slam3/Vocabulary/ORBvoc.txt.bin"/>
-        <param name="settings_file" type="string" value="$(find omni_slam)/config/omni_camera.yaml"/>
+        <param name="settings_file" type="string" value="$(find omni_slam)/config/omni_camera_mono.yaml"/>
 
         <!-- Parameters for ROS -->
         <param name="world_frame_id"    type="string"   value="map" />

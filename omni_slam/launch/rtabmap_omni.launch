@@ -28,8 +28,8 @@
   <arg name="rviz_cfg"                default="$(find rtabmap_launch)/launch/config/rgbd.rviz" /> -->
 
   <arg name="frame_id"                default="base_footprint"/>     <!-- Fixed frame id, you may set "base_link" or "base_footprint" if they are published -->
-  <arg name="odom_frame_id"           default=""/>                <!-- If set, TF is used to get odometry instead of the topic -->
-  <arg name="odom_frame_id_init"      default=""/>                <!-- If set, TF map->odom is published even if no odometry topic has been received yet. The frame id should match the one in the topic. -->
+  <arg name="odom_frame_id"           default="odom"/>                <!-- If set, TF is used to get odometry instead of the topic -->
+  <arg name="odom_frame_id_init"      default="odom"/>                <!-- If set, TF map->odom is published even if no odometry topic has been received yet. The frame id should match the one in the topic. -->
   <arg name="map_frame_id"            default="map"/>
   <arg name="ground_truth_frame_id"   default=""/>     <!-- e.g., "world" -->
   <arg name="ground_truth_base_frame_id" default=""/>  <!-- e.g., "tracker", a fake frame matching the frame "frame_id" (but on different TF tree) -->
@@ -37,7 +37,7 @@
   <arg name="database_path"           default="~/.ros/rtabmap.db"/>
   <arg name="queue_size"              default="10"/>
   <arg name="wait_for_transform"      default="0.2"/>
-  <arg name="args"                    default="false"/>              <!-- delete_db_on_start, udebug -->
+  <arg name="args"                    default="true"/>              <!-- delete_db_on_start, udebug -->
   <arg name="rtabmap_args"            default="$(arg args)"/>   <!-- deprecated, use "args" argument -->
   <arg name="gdb"                     default="false"/>         <!-- Launch nodes in gdb for debugging (apt install xterm gdb) -->
   <arg     if="$(arg gdb)" name="launch_prefix" default="xterm -e gdb -q -ex run --args"/>
@@ -81,7 +81,7 @@
   <arg name="gen_cloud_decimation"    default="4"/>
   <arg name="gen_cloud_voxel"         default="0.05"/>
 
-  <arg name="subscribe_scan"          default="false"/>
+  <arg name="subscribe_scan"          default="true"/>
   <arg name="scan_topic"              default="/scan"/>
   <arg name="subscribe_scan_cloud"    default="$(arg gen_cloud)"/>
   <arg name="scan_cloud_topic"        default="/scan_cloud"/>
@@ -107,7 +107,7 @@
   <arg name="odom_tf_angular_variance" default="0.001"/>         <!-- If TF is used to get odometry, this is the default angular variance -->
   <arg name="odom_tf_linear_variance"  default="0.001"/>         <!-- If TF is used to get odometry, this is the default linear variance -->
   <arg name="odom_args"                default=""/>              <!-- More arguments for odometry (overwrite same parameters in rtabmap_args) -->
-  <arg name="odom_sensor_sync"         default="false"/>
+  <arg name="odom_sensor_sync"         default="true"/>
   <arg name="odom_guess_frame_id"        default=""/>
   <arg name="odom_guess_min_translation" default="0"/>
   <arg name="odom_guess_min_rotation"    default="0"/>
