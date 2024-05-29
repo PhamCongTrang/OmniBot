@@ -169,6 +169,8 @@ include_directories(
 catkin_install_python(PROGRAMS
   # scripts/my_python_script
   src/collect_dataset.py
+  src/query_database.py
+  src/query_database_particle.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

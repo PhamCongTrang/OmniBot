@@ -27,8 +27,8 @@ class ImageLocationSaver:
 
         # Define the paths
         package_dir = os.path.dirname(os.path.abspath(__file__))
-        self.image_dir = os.path.join(package_dir, '../dataset/image')
-        self.pose_dir = os.path.join(package_dir, '../dataset/odom')
+        self.image_dir = os.path.join(package_dir, '../dataset/207/image')
+        self.pose_dir = os.path.join(package_dir, '../dataset/207/pose')
 
         # Create directories if they don't exist
         if not os.path.exists(self.image_dir):
@@ -48,8 +48,7 @@ class ImageLocationSaver:
             transform: TransformStamped = self.tf_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
             self.position = transform.transform.translation
             self.rotation = transform.transform.rotation
-            # if self.position is None or self.rotation is None:
-            #     rospy.logger("Position is None")
+
         except Exception as e:
             rospy.logerr("Error getting transform: %s", e)
 
