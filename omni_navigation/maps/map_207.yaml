@@ -1,0 +1,6 @@
+image: /home/aaeon/catkin_ws/src/OmniBot/omni_slam/maps/map_207.pgm
+resolution: 0.05
+origin: [-6.07756, -6.07572, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

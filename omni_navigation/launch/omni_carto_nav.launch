@@ -1,0 +1,18 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="map_file" default="$(find omni_navigation)/maps/map_207.yaml"/>
+  <arg name="move_forward_only" default="false"/>
+
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- Localization mode -->
+  <include file="$(find omni_slam)/launch/omni_carto_localization_mode.launch"/>
+
+  <!-- move_base -->
+  <include file="$(find omni_navigation)/launch/move_base.launch">
+    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  </include>
+
+</launch>
