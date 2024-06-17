@@ -1,15 +1,28 @@
 <launch>
-  <!-- Arguments -->
-  <arg name="slam_methods" default="gmapping" doc="slam type [gmapping, cartographer, hector, karto, frontier_exploration]"/>
-  <arg name="open_rviz" default="false"/>
+  <!-- ARG -->
+  <arg name="slam_methods" default="cartographer" doc="slam type [gmapping, cartographer, hector, orb_slam3]"/>
+  <arg name="bagfile" default="true"/>
+  
+  <!-- PLAY BAGFILE -->
+  <group if="$(arg bagfile)"> 
+    <param name="/use_sim_time" value="true" />
+    
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"> 
+          <remap from="odometry/filtered" to="odom"/>
+          <rosparam command="load" file="$(find omni_bringup)/param/ekf/robot_localization.yaml" />
+    </node>
+    <node name="playbag" pkg="rosbag" type="play"
+      args="$(arg bagfile_name) --clock --topics /odom /tf_static /imu/raw /scan /camera/color/image_raw" />
+  </group>
+  <!-- SLAM METHOD-->
+  <include file="$(find omni_slam)/launch/omni_$(arg slam_methods).launch"/>
 
-  <!-- Bringup -->
-  <include file="$(find omni_bringup)/launch/omni_bringup.launch">
-  </include>
-
-  <!-- SLAM: Gmapping, Cartographer, Hector, Karto, Frontier_exploration, RTAB-Map -->
-  <include file="$(find omni_slam)/launch/omni_$(arg slam_methods).launch">
-    <arg name="configuration_basename" value="$(arg configuration_basename)"/>
-  </include>
-
+  <!-- RVIZ -->
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+      args="-d $(find omni_slam)/rivz/omni_$(arg slam_methods).rviz" />
+ 
 </launch>
+
+<!--                                                      EXAMPLE
+roslaunch omni_slam omni_slam.launch slam_methods:=cartographer bagfile_name:=/media/focal/01DA3132B2ED4170/datasets/bagfiles/c9/2024-06-09-15-02-44.bag
+-->
