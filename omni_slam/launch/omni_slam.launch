@@ -1,18 +1,19 @@
 <launch>
   <!-- ARG -->
-  <arg name="slam_methods" default="cartographer" doc="slam type [gmapping, cartographer, cartographer_orb_slam3, hector, orb_slam3]"/>
+  <arg name="slam_methods" default="cartographer" doc="slam type [gmapping, cartographer, cartographer_orb_slam3, hector, orb_slam3, carto_localization_mode]"/>
   <arg name="bagfile" default="true"/>
+  <arg name="bagfile_name" default="/media/focal/01DA3132B2ED4170/datasets/bagfiles/c9/map-2024-06-09-15-02-44.bag"/>
   
   <!-- PLAY BAGFILE -->
   <group if="$(arg bagfile)"> 
     <param name="/use_sim_time" value="true" />
     
-    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"> 
+    <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"> 
           <remap from="odometry/filtered" to="odom"/>
           <rosparam command="load" file="$(find omni_bringup)/param/ekf/robot_localization.yaml" />
-    </node>
+    </node> -->
     <node name="playbag" pkg="rosbag" type="play"
-      args="$(arg bagfile_name) --clock --topics /odom /tf_static /imu/raw /scan /camera/color/image_raw /camera/depth/image_rect_raw --start 90" />
+      args="$(arg bagfile_name) --clock --topics /odom /tf_static /imu/raw /scan /camera/color/image_raw /camera/depth/image_rect_raw " />
       
   </group>
   <!-- SLAM METHOD-->

@@ -1,7 +1,7 @@
 <launch>
-  <param name="use_sim_time" value="false"/>
+  <param name="use_sim_time" value="true"/>
 
-  <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" args="-configuration_directory $(find omni_slam)/config -configuration_basename localization.lua -load_state_filename $(find omni_slam)/maps/map_207.pbstream"
+  <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" args="-configuration_directory $(find omni_slam)/config -configuration_basename long.lua -load_state_filename $(find omni_slam)/maps/c9-00.pbstream"
     output="screen">
   </node>
 

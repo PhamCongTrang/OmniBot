@@ -4,6 +4,10 @@
   <arg name="set_odom_frame" default="odom"/>
   <arg name="set_map_frame"  default="map"/>
 
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"> 
+        <remap from="odometry/filtered" to="odom"/>
+        <rosparam command="load" file="$(find omni_bringup)/param/ekf/robot_localization.yaml" />
+  </node>
   <!-- Gmapping -->
   <node pkg="gmapping" type="slam_gmapping" name="omni_slam_gmapping" output="screen">
     <param name="base_frame" value="$(arg set_base_frame)"/>

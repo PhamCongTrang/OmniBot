@@ -1,6 +1,6 @@
 <launch>
   <!-- Arguments -->
-  <arg name="configuration_basename" default="wheel.lua"/>
+  <arg name="configuration_basename" default="dat.lua"/>
 
   <!-- cartographer_node -->
   <node pkg="cartographer_ros" type="cartographer_node" name="cartographer_node" 

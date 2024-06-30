@@ -1,5 +1,5 @@
 <launch>
-    <param name="use_sim_time" value="false" />
+    <param name="use_sim_time" value="true" />
 
     <!-- Main node -->
     <node name="orb_slam3" pkg="orb_slam3_ros" type="ros_rgbd" output="screen">
@@ -14,7 +14,7 @@
         <!-- Parameters for ROS -->
         <param name="world_frame_id"    type="string"   value="map" />
         <param name="cam_frame_id"      type="string"   value="camera_link" />
-        <param name="enable_pangolin"   type="bool"     value="false" />
+        <param name="enable_pangolin"   type="bool"     value="true" />
     </node>
     
     <!-- Visualization -->
