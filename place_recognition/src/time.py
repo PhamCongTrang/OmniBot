@@ -3,24 +3,23 @@
 import rospy
 import cv2
 from cv_bridge import CvBridge
-from sensor_msgs.msg import Image, PointCloud2
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray
+from sensor_msgs.msg import Image
+from geometry_msgs.msg import PoseWithCovarianceStamped
 import pydbow3 as DBoW3
 import os
 import glob
 import yaml
 import time
-class AmclMonitor:
+
+class Monitor:
     def __init__(self):
         rospy.init_node('amcl_monitor', anonymous=True)
         self.bridge = CvBridge()
-        self.image_sub = None
         self.pose_pub = rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
-
+        
         # Load vocabulary and create database
         rospy.loginfo("[Loading vocabulary] start")
         voc_path = os.path.join(os.path.dirname(__file__), '/home/focal/omni_ws/src/OmniBot/place_recognition/config/sthereo_07_rgb_4_3.yaml')
-        # print("Current path is", os.getcwd())
         self.voc = DBoW3.Vocabulary()
         self.voc.load(voc_path)
 
@@ -43,53 +42,30 @@ class AmclMonitor:
         rospy.loginfo(self.db)
         rospy.loginfo("[DBoW3::Database::add] end")
 
-        # Subscribe to /particlecloud
-        # rospy.Subscriber("/particlecloud", PoseArray, self.particlecloud_callback)
-
-        # Subscribe to /amcl_pose
-        rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self.covarian_callback)  
+        # Set up timer to subscribe to image topic at specific times
+        self.trigger_times = [0, 21, 47]  # Seconds to trigger the callback
+        self.callbacks_done = 0  # Number of callbacks done
+        self.timer = rospy.Timer(rospy.Duration(1), self.timer_callback)  # Check every second
 
     def load_image_paths(self, directory):
         """Load image paths from the specified directory."""
         return glob.glob(os.path.join(directory, '*.png'))
 
-    def particlecloud_callback(self, data):
-        particle_count = len(data.poses)
-        rospy.loginfo("Number of particles: %d", particle_count)
-        if particle_count > some_threshold:
-            rospy.logwarn("Number of particles > threshold!")
-            self.lost_localization = True
-            if self.image_sub is None:
-                self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
-        else:
-            self.lost_localization = False
-            if self.image_sub is not None:
-                self.image_sub.unregister()
-                self.image_sub = None
-
-    def covarian_callback(self, data):
-        cov0 = data.pose.covariance[0]
-        rospy.loginfo("Covariance : %.1f", cov0)
-        if cov0 > covariance_threshold:
-            rospy.logwarn("Covarian > threshold!")
-            self.lost_localization = True
-            if self.image_sub is None:
-                self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
-            time.sleep(2)
-        else:
-            self.lost_localization = False
-            if self.image_sub is not None:
-                self.image_sub.unregister()
-                self.image_sub = None
-
-    def point_cloud2_to_array(self, cloud_msg):
-        # Converts PointCloud2 to an array (optional implementation)
-        from sensor_msgs import point_cloud2
-        return point_cloud2.read_points(cloud_msg, field_names=("x", "y", "z"), skip_nans=True)
+    def timer_callback(self, event):
+        # current_time = (event.current_real - rospy.Time.now()).secs % 60
+        current_time = event.current_real.to_sec() % 60
+        rospy.loginfo("Current time: %d", current_time)
+        if current_time in self.trigger_times and self.callbacks_done < len(self.trigger_times):
+            self.callbacks_done += 1
+            self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
+            rospy.loginfo("Subscribed to /camera/color/image_raw")
 
     def image_callback(self, img_msg):
-        if not self.lost_localization:
-            return
+        if self.image_sub:
+            self.image_sub.unregister()  # Unsubscribe after receiving the image
+            self.image_sub = None
+            rospy.loginfo("Unsubscribed from /camera/color/image_raw")
+
         try:
             cv_image = self.bridge.imgmsg_to_cv2(img_msg, "mono8")
             rospy.loginfo("Received image from /camera/color/image_raw")
@@ -102,8 +78,7 @@ class AmclMonitor:
             rospy.loginfo("Query results: %s", str(results))
             rospy.loginfo("Best match score: %f", results[0].Score)
             
-            # if results:
-            if results[0].Score > 0.76:
+            if results and results[0].Score > 0.76:
                 # Get the image path with the highest score
                 best_match_id = results[0].Id
                 best_match_path = self.db_to_image_path(best_match_id)
@@ -115,7 +90,6 @@ class AmclMonitor:
                     rospy.loginfo("ID: %s", str(odom_path))
                 else:
                     rospy.logwarn("Corresponding odom file not found: %s", odom_path)
-            time.sleep(2)   
         except Exception as e:
             rospy.logerr("Can not convert image: %s", e)
 
@@ -160,7 +134,6 @@ class AmclMonitor:
             rospy.logerr("Can not read file odom: %s", e)
 
 if __name__ == '__main__':
-    some_threshold = 1500  # Set threshold for the number of particles
     covariance_threshold = 0.1
-    monitor = AmclMonitor()
+    monitor = Monitor()
     rospy.spin()

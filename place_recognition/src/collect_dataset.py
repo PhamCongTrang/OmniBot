@@ -22,13 +22,13 @@ class ImageLocationSaver:
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
 
-        self.save_interval = 2  # seconds
+        self.save_interval = 1  # seconds
         self.last_save_time = time.time()
 
         # Define the paths
         package_dir = os.path.dirname(os.path.abspath(__file__))
-        self.image_dir = os.path.join(package_dir, '../dataset/207/image')
-        self.pose_dir = os.path.join(package_dir, '../dataset/207/pose')
+        self.image_dir = os.path.join(package_dir, '../dataset/c9_1/image')
+        self.pose_dir = os.path.join(package_dir, '../dataset/c9_1/pose')
 
         # Create directories if they don't exist
         if not os.path.exists(self.image_dir):
@@ -77,7 +77,8 @@ class ImageLocationSaver:
             pose_msg.pose.pose.orientation = self.rotation
             
             # Define the covariance
-            covariance = [0.25] + [0.0] * 34 + [0.06853892326654787]
+            # covariance = [0.25] + [0.0] * 34 + [0.06853892326654787]
+            covariance = [0.0] * 36
 
             # Define file name based on current time
             pose_file_name = os.path.join(self.pose_dir, f"{timestamp}.txt")
